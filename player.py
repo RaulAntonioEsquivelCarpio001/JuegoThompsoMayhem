@@ -44,3 +44,5 @@ class Player:
         if len(self.bullets) < self.settings.bullets_allowed:
             new_bullet = Bullet(self.settings, self.screen, self)
             self.bullets.add(new_bullet)
+        elif len(self.bullets) >= self.settings.bullets_allowed:
+            self.game.game_over = True  # Set the game over flag

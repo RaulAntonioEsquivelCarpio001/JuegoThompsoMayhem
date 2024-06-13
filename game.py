@@ -1,19 +1,41 @@
 import pygame
 from player import Player
+from enemy import Enemy
 
 class Game:
     def __init__(self, screen, settings):
         self.screen = screen
         self.settings = settings
         self.player = Player(settings, screen)
+        self.player.game = self  # Pass the game instance to the player
         self.clock = pygame.time.Clock()
         self.running = True
+        self.game_over = False  # Flag for game over
+
+        # Initialize enemies
+        self.enemies = pygame.sprite.Group()
+        self._create_enemies()
+
+        # List to track bullets to remove
+        self.bullets_to_remove = []
+
+    def _create_enemies(self):
+        positions = [(100, 100), (200, 200), (300, 300), (400, 400)]
+        for pos in positions:
+            enemy = Enemy(self.settings, self.screen, *pos)
+            self.enemies.add(enemy)
 
     def run(self):
         while self.running:
             self._check_events()
-            self.player.update()
-            self._update_screen()
+            if self.game_over:
+                self._show_game_over()
+                pygame.time.wait(5000)  # Wait for 5 seconds
+                pygame.quit()
+                quit()  # Close the game
+            else:
+                self.player.update()
+                self._update_screen()
             self.clock.tick(self.settings.fps)
 
     def _check_events(self):
@@ -51,9 +73,29 @@ class Game:
 
     def _update_screen(self):
         self.screen.fill(self.settings.bg_color)
+        self.player.update()
         self.player.blitme()
+
+        # Check collisions between bullets and enemies
+        collisions = pygame.sprite.groupcollide(self.player.bullets, self.enemies, False, False)
+        for bullet, hit_enemies in collisions.items():
+            for enemy in hit_enemies:
+                enemy.take_damage()
+                bullet.hits += 1  # Increment hits for the bullet
+
+                if bullet.hits >= 2:
+                    self.bullets_to_remove.append(bullet)
+
+        # Remove bullets that have hit enough times
+        for bullet in self.bullets_to_remove:
+            self.player.bullets.remove(bullet)
+
+        # Draw enemies that are still alive
+        for enemy in self.enemies:
+            enemy.draw()
+
         self._draw_ui()
-        self._draw_buttons()  # Redibujar botones
+        self._draw_buttons()
         pygame.display.flip()
 
     def _draw_ui(self):
@@ -65,18 +107,24 @@ class Game:
 
     def _check_mouse_click(self, event):
         mouse_pos = pygame.mouse.get_pos()
-        if event.button == 1:  # Botón izquierdo del ratón
-            # Botón de salida
+        if event.button == 1:  # Left mouse button
             exit_button_rect = pygame.Rect(20, 20, 100, 50)
             if exit_button_rect.collidepoint(mouse_pos):
                 pygame.quit()
                 quit()
 
     def _draw_buttons(self):
-        # Botón de salida
+        # Exit button
         exit_button_rect = pygame.Rect(20, 20, 100, 50)
         pygame.draw.rect(self.screen, (0, 0, 255), exit_button_rect)
         font = pygame.font.Font(None, 36)
         text = font.render("Salir", True, (255, 255, 255))
         text_rect = text.get_rect(center=exit_button_rect.center)
         self.screen.blit(text, text_rect)
+
+    def _show_game_over(self):
+        font = pygame.font.Font(None, 74)
+        game_over_text = font.render("GAME OVER", True, (255, 0, 0))
+        game_over_rect = game_over_text.get_rect(center=(self.settings.screen_width / 2, self.settings.screen_height / 2))
+        self.screen.blit(game_over_text, game_over_rect)
+        pygame.display.flip()

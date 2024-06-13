@@ -17,6 +17,7 @@ class Bullet(pygame.sprite.Sprite):
         self.speed = self.settings.bullet_speed
 
         self.direction = player.direction
+        self.hits = 0  # New attribute to track how many times the bullet has hit enemies
 
     def update(self):
         if self.direction == 'right':

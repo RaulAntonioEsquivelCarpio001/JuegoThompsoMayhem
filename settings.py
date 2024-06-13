@@ -12,4 +12,7 @@ class Settings:
         self.bullet_width = 5
         self.bullet_height = 15
         self.bullet_color = (0, 0, 0)
-        self.bullets_allowed = 15
+        self.bullets_allowed = 5
+
+        # Enemy settings
+        self.enemy_size = (50, 50)
