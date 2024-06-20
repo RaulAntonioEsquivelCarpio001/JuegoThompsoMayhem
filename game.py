@@ -35,6 +35,7 @@ class Game:
                 quit()  # Close the game
             else:
                 self.player.update()
+                self.enemies.update()  # Update enemies' positions
                 self._update_screen()
             self.clock.tick(self.settings.fps)
 
@@ -100,7 +101,7 @@ class Game:
 
     def _draw_ui(self):
         font = pygame.font.Font(None, 36)
-        text = font.render(f'Balas: {len(self.player.bullets)}/{self.settings.bullets_allowed}', True, (255, 255, 255))
+        text = font.render(f'Bullets: {len(self.player.bullets)}/{self.settings.bullets_allowed}', True, (255, 255, 255))
         text_rect = text.get_rect()
         text_rect.topright = (self.settings.screen_width - 20, 20)
         self.screen.blit(text, text_rect)
@@ -118,7 +119,7 @@ class Game:
         exit_button_rect = pygame.Rect(20, 20, 100, 50)
         pygame.draw.rect(self.screen, (0, 0, 255), exit_button_rect)
         font = pygame.font.Font(None, 36)
-        text = font.render("Salir", True, (255, 255, 255))
+        text = font.render("Exit", True, (255, 255, 255))
         text_rect = text.get_rect(center=exit_button_rect.center)
         self.screen.blit(text, text_rect)
 
