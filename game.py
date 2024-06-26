@@ -119,6 +119,7 @@ class Game:
         self.current_round += 1
         if self.current_round % 3 == 1:
             self.round_enemies += 1
+        self.player.reload_bullets()  # Recargar balas
         self._create_enemies()
 
     def _draw_ui(self):

@@ -46,3 +46,6 @@ class Player:
             self.bullets.add(new_bullet)
         elif len(self.bullets) >= self.settings.bullets_allowed:
             self.game.game_over = True  # Set the game over flag
+    
+    def reload_bullets(self):
+        self.bullets = pygame.sprite.Group()
