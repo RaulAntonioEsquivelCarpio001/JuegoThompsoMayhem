@@ -6,12 +6,20 @@ def main():
     pygame.init()
     settings = Settings()
     screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
-    pygame.display.set_caption("My Game")
+    pygame.display.set_caption("Mi Juego")
 
+    # Mostrar pantalla de inicio
     show_start_screen(screen, settings)
 
+    # Inicializar el juego
     game = Game(screen, settings)
     game.player.game = game
+
+    # Cargar y reproducir música de fondo
+    pygame.mixer.music.load('sound/sheIsonFire.mp3')
+    pygame.mixer.music.play(-1)  # -1 para reproducir en bucle
+
+    # Ejecutar el juego
     while True:
         game.run()
 
