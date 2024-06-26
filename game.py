@@ -22,7 +22,7 @@ class Game:
         self.bullets_to_remove = []
 
         self._create_enemies()
-        self._create_powerup()  # Crear el primer power-up
+        self._create_powerups()  # Crear los primeros power-ups
 
     def _create_enemies(self):
         self.enemies.empty()
@@ -31,10 +31,12 @@ class Game:
             enemy = Enemy(self.settings, self.screen, x, y)
             self.enemies.add(enemy)
 
-    def _create_powerup(self):
+    def _create_powerups(self):
         self.powerups.empty()
-        powerup = PowerUp(self.settings, self.screen)
-        self.powerups.add(powerup)
+        num_powerups = (self.current_round - 1) // 10 + 1  # Calcular el número de power-ups según la ronda
+        for _ in range(num_powerups):
+            powerup = PowerUp(self.settings, self.screen)
+            self.powerups.add(powerup)
 
     def _generate_random_position(self):
         import random
@@ -130,7 +132,7 @@ class Game:
             self.round_enemies += 1
         self.player.reload_bullets()
         self._create_enemies()
-        self._create_powerup()  # Crear un nuevo power-up
+        self._create_powerups()  # Crear nuevos power-ups
 
     def _draw_ui(self):
         font = pygame.font.Font(None, 36)
@@ -166,3 +168,4 @@ class Game:
         game_over_rect = game_over_text.get_rect(center=(self.settings.screen_width / 2, self.settings.screen_height / 2))
         self.screen.blit(game_over_text, game_over_rect)
         pygame.display.flip()
+
