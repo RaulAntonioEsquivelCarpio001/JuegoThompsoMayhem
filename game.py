@@ -1,35 +1,40 @@
 import pygame
 from player import Player
 from enemy import Enemy
+from powerup import PowerUp
 
 class Game:
     def __init__(self, screen, settings):
         self.screen = screen
         self.settings = settings
         self.player = Player(settings, screen)
-        self.player.game = self  # Pasar la instancia del juego al jugador
+        self.player.game = self
         self.clock = pygame.time.Clock()
         self.running = True
-        self.game_over = False  # Flag para game over
+        self.game_over = False
 
-        # Inicializar enemigos y rondas
         self.enemies = pygame.sprite.Group()
+        self.powerups = pygame.sprite.Group()  # Grupo de power-ups
         self.current_round = 1
-        self.round_enemies = 3  # Enemigos iniciales por ronda
+        self.round_enemies = 3
         self.enemies_killed = 0
 
-        # Lista para rastrear balas a eliminar
         self.bullets_to_remove = []
 
-        # Crear enemigos iniciales
         self._create_enemies()
+        self._create_powerup()  # Crear el primer power-up
 
     def _create_enemies(self):
-        self.enemies.empty()  # Vaciar el grupo de enemigos
+        self.enemies.empty()
         for _ in range(self.round_enemies):
             x, y = self._generate_random_position()
             enemy = Enemy(self.settings, self.screen, x, y)
             self.enemies.add(enemy)
+
+    def _create_powerup(self):
+        self.powerups.empty()
+        powerup = PowerUp(self.settings, self.screen)
+        self.powerups.add(powerup)
 
     def _generate_random_position(self):
         import random
@@ -42,12 +47,12 @@ class Game:
             self._check_events()
             if self.game_over:
                 self._show_game_over()
-                pygame.time.wait(5000)  # Esperar 5 segundos
+                pygame.time.wait(5000)
                 pygame.quit()
-                quit()  # Cerrar el juego
+                quit()
             else:
                 self.player.update()
-                self.enemies.update()  # Actualizar posiciones de los enemigos
+                self.enemies.update()
                 self._update_screen()
             self.clock.tick(self.settings.fps)
 
@@ -89,29 +94,33 @@ class Game:
         self.player.update()
         self.player.blitme()
 
-        # Comprobar colisiones entre balas y enemigos
         collisions = pygame.sprite.groupcollide(self.player.bullets, self.enemies, False, False)
         for bullet, hit_enemies in collisions.items():
             for enemy in hit_enemies:
                 enemy.take_damage()
-                bullet.hits += 1  # Incrementar los golpes para la bala
-
+                bullet.hits += 1
                 if bullet.hits >= 2:
                     self.bullets_to_remove.append(bullet)
 
-        # Eliminar balas que han golpeado suficiente veces
         for bullet in self.bullets_to_remove:
             self.player.bullets.remove(bullet)
 
-        # Dibujar enemigos que aún están vivos
         for enemy in self.enemies:
             enemy.draw()
+
+        # Detectar colisión con power-ups
+        powerup_collisions = pygame.sprite.spritecollide(self.player, self.powerups, True)
+        if powerup_collisions:
+            self.player.reload_bullets()
+
+        # Dibujar power-ups
+        for powerup in self.powerups:
+            powerup.draw()
 
         self._draw_ui()
         self._draw_buttons()
         pygame.display.flip()
 
-        # Comprobar si todos los enemigos han sido eliminados
         if not self.enemies:
             self._next_round()
 
@@ -119,8 +128,9 @@ class Game:
         self.current_round += 1
         if self.current_round % 3 == 1:
             self.round_enemies += 1
-        self.player.reload_bullets()  # Recargar balas
+        self.player.reload_bullets()
         self._create_enemies()
+        self._create_powerup()  # Crear un nuevo power-up
 
     def _draw_ui(self):
         font = pygame.font.Font(None, 36)
@@ -136,14 +146,13 @@ class Game:
 
     def _check_mouse_click(self, event):
         mouse_pos = pygame.mouse.get_pos()
-        if event.button == 1:  # Botón izquierdo del ratón
+        if event.button == 1:
             exit_button_rect = pygame.Rect(20, 20, 100, 50)
             if exit_button_rect.collidepoint(mouse_pos):
                 pygame.quit()
                 quit()
 
     def _draw_buttons(self):
-        # Botón de salida
         exit_button_rect = pygame.Rect(20, 20, 100, 50)
         pygame.draw.rect(self.screen, (0, 0, 255), exit_button_rect)
         font = pygame.font.Font(None, 36)

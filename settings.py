@@ -18,3 +18,5 @@ class Settings:
         self.enemy_size = (50, 50)
         self.enemy_speed_x = 3  # Velocidad horizontal de los enemigos
         self.enemy_speed_y = 3  # Velocidad vertical de los enemigos
+
+        
